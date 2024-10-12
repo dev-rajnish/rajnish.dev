@@ -7,7 +7,7 @@
     },
     {
       "source": "/:shortcode",
-      "destination": "/api/redirects?shortcode=:shortcode",
+      "destination": "/app/pages/api/redirects?shortcode=:shortcode",
       "permanent": true
     }
   ]
