@@ -1,7 +1,7 @@
 //const fetch = (await import('node-fetch')).default;
 const YOUR_SPREADSHEET_ID = '1dWUL3W7p5Wff_cvXQwd-hD3-kP4A2Y4glcK72XoIkfo';
 //const YOUR_API_KEY = 'AIzaSyCXmMCqNqYHkE7ttfsktdAUdKAgWnNVo6E'; // Use your actual API Key here
-const YOUR_API_KEY = 'process.env.GSHEET_API';
+const YOUR_API_KEY = process.env.GSHEET_API;
 
 export default async function handler(req, res) {
   const { shortcode } = req.query; // Get the shortcode from the query parameters
