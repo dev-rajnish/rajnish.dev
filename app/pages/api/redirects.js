@@ -3,7 +3,7 @@ import { google } from 'googleapis';
 // Use dynamic import for node-fetch
 let fetch;
 (async () => {
-  fetch = (await import('node-fetch')).default;
+  fetch = (await import('node-fetch'));
 })();
 
 const sheets = google.sheets('v4');
