@@ -1,6 +1,7 @@
-const fetch = (await import('node-fetch')).default;
+//const fetch = (await import('node-fetch')).default;
 const YOUR_SPREADSHEET_ID = '1dWUL3W7p5Wff_cvXQwd-hD3-kP4A2Y4glcK72XoIkfo';
-const YOUR_API_KEY = 'AIzaSyCXmMCqNqYHkE7ttfsktdAUdKAgWnNVo6E'; // Use your actual API Key here
+//const YOUR_API_KEY = 'AIzaSyCXmMCqNqYHkE7ttfsktdAUdKAgWnNVo6E'; // Use your actual API Key here
+const YOUR_API_KEY = 'process.env.GSHEET_API';
 
 export default async function handler(req, res) {
   const { shortcode } = req.query; // Get the shortcode from the query parameters
@@ -23,7 +24,7 @@ export default async function handler(req, res) {
       const originalUrl = foundRow[1]; // Assuming original URL is in the second column
       return res.redirect(originalUrl); // Redirect to the original URL
     } else {
-      return res.status(404).json({ error: 'Shortcode not found' });
+      return res.redirect('/');
     }
   } catch (error) {
     console.error('Error accessing Google Sheets:', error);
