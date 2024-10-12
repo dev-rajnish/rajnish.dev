@@ -1,13 +1,13 @@
 {
   "redirects": [
     {
-      "source": "/e",
+      "source": "/eg",
       "destination": "https://example.com",
       "permanent": true
     },
     {
       "source": "/:shortcode",
-      "destination": "/app/pages/api/redirects?shortcode=:shortcode",
+      "destination": "/api/redirects?shortcode=:shortcode",
       "permanent": true
     }
   ]
