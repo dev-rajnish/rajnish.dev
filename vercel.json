@@ -2,7 +2,7 @@
   "redirects": [
   {
       "source": "/favicon.ico",
-      "destination": "./favicon.ico",
+      "destination": "/favicon.ico",
       "permanent": true
     },
     {
