@@ -24,7 +24,9 @@ export default async function handler(req, res) {
         if (isSetRequest) {
             // Handle URL creation
             const queryParams = { ...req.query };
-            const [[shortcode, longUrl]] = Object.entries(queryParams);
+            const [[shortcode, encodedLongUrl]] = Object.entries(queryParams);
+            const longUrl = decodeURIComponent(encodedLongUrl);
+
 
             if (!shortcode || !longUrl) {
                 return res.status(400).json({
