@@ -1,7 +1,21 @@
+import { createClient } from 'redis';
+
+let redis;
+
+(async () => {
+    redis = createClient({
+        url: process.env.REDIS_URL || 'redis://localhost:6379'
+    });
+
+    // Connect to Redis and handle connection errors
+    redis.on('error', (err) => console.error('Redis Client Error:', err));
+    await redis.connect().catch(console.error);
+})();
+
 export default async function handler(req, res) {
     try {
         // Ensure Redis is connected
-        if (!redis.isOpen) {
+        if (!redis || !redis.isOpen) {
             await redis.connect();
         }
 
@@ -9,13 +23,8 @@ export default async function handler(req, res) {
         const isSetRequest = req.url.includes('/set');
 
         if (isSetRequest) {
-            // Log the full query parameters for debugging
-            console.log("Full query params:", req.query);
-
-            // Extract shortcode and longUrl, decoding the values properly
             const queryParams = { ...req.query };
             const [[shortcode, encodedLongUrl]] = Object.entries(queryParams);
-
             if (!shortcode || !encodedLongUrl) {
                 return res.status(400).json({
                     error: 'Invalid format',
@@ -23,11 +32,8 @@ export default async function handler(req, res) {
                 });
             }
 
-            // Decode the URL to make sure it’s in a readable format
             const longUrl = decodeURIComponent(encodedLongUrl);
-            console.log("Decoded Long URL:", longUrl);
 
-            // Basic URL validation
             try {
                 new URL(longUrl);
             } catch (e) {
@@ -37,7 +43,6 @@ export default async function handler(req, res) {
                 });
             }
 
-            // Check if shortcode exists
             const exists = await redis.get(shortcode);
             if (exists) {
                 return res.status(200).json({
@@ -48,9 +53,7 @@ export default async function handler(req, res) {
                 });
             }
 
-            // Store URL
             await redis.set(shortcode, longUrl);
-
             return res.status(200).json({
                 message: 'URL shortened successfully',
                 shortcode,
@@ -58,10 +61,8 @@ export default async function handler(req, res) {
                 shortUrl: `${process.env.DOMAIN || `http://${req.headers.host}`}/${shortcode}`
             });
         } else {
-            // Handle URL retrieval and redirect
             const urlParts = req.url.split('/');
             const shortcode = urlParts[urlParts.length - 1];
-
             if (!shortcode || shortcode === 'redirects') {
                 return res.status(400).json({
                     error: 'Shortcode required',
@@ -80,7 +81,6 @@ export default async function handler(req, res) {
                 });
             }
 
-            // Perform the redirect
             return res.redirect(url);
         }
     } catch (error) {
@@ -88,3 +88,9 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: 'Internal server error' });
     }
 }
+
+export const config = {
+    api: {
+        bodyParser: true,
+    },
+};
