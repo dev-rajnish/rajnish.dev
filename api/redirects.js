@@ -1,16 +1,3 @@
-// pages/api/redirects.js
-import { createClient } from 'redis';
-
-const redis = createClient({
-    url: process.env.REDIS_URL || 'redis://localhost:6379'
-});
-
-// Connect to Redis
-redis.connect().catch(console.error);
-
-// Handle connection errors
-redis.on('error', err => console.error('Redis Client Error:', err));
-
 export default async function handler(req, res) {
     try {
         // Ensure Redis is connected
@@ -18,22 +5,27 @@ export default async function handler(req, res) {
             await redis.connect();
         }
 
-        // Get the path and check if it's a set request
+        // Check if it's a set request by matching "/set" in the query
         const isSetRequest = req.url.includes('/set');
 
         if (isSetRequest) {
-            // Handle URL creation
+            // Log the full query parameters for debugging
+            console.log("Full query params:", req.query);
+
+            // Extract shortcode and longUrl, decoding the values properly
             const queryParams = { ...req.query };
             const [[shortcode, encodedLongUrl]] = Object.entries(queryParams);
-            const longUrl = decodeURIComponent(encodedLongUrl);
 
-
-            if (!shortcode || !longUrl) {
+            if (!shortcode || !encodedLongUrl) {
                 return res.status(400).json({
                     error: 'Invalid format',
                     usage: `Use: ${process.env.DOMAIN || `http://${req.headers.host}`}/api/redirects/set?yourshortcode=https://example.com`
                 });
             }
+
+            // Decode the URL to make sure it’s in a readable format
+            const longUrl = decodeURIComponent(encodedLongUrl);
+            console.log("Decoded Long URL:", longUrl);
 
             // Basic URL validation
             try {
@@ -67,7 +59,6 @@ export default async function handler(req, res) {
             });
         } else {
             // Handle URL retrieval and redirect
-            // Extract shortcode from the URL
             const urlParts = req.url.split('/');
             const shortcode = urlParts[urlParts.length - 1];
 
@@ -96,11 +87,4 @@ export default async function handler(req, res) {
         console.error('Redis error:', error);
         return res.status(500).json({ error: 'Internal server error' });
     }
-}
-
-// Add configuration for handling all HTTP methods
-export const config = {
-    api: {
-        bodyParser: true,
-    },
 }
