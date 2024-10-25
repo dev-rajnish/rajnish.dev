@@ -1,96 +1,32 @@
-import { createClient } from 'redis';
 
-let redis;
-
-(async () => {
-    redis = createClient({
-        url: process.env.REDIS_URL || 'redis://localhost:6379'
-    });
-
-    // Connect to Redis and handle connection errors
-    redis.on('error', (err) => console.error('Redis Client Error:', err));
-    await redis.connect().catch(console.error);
-})();
+const YOUR_SPREADSHEET_ID = process.env.GSHEET_ID;
+const YOUR_API_KEY = process.env.GSHEET_API;
 
 export default async function handler(req, res) {
-    try {
-        // Ensure Redis is connected
-        if (!redis || !redis.isOpen) {
-            await redis.connect();
-        }
+  const { shortcode } = req.query; // Get the shortcode from the query parameters
 
-        // Check if it's a set request by matching "/set" in the query
-        const isSetRequest = req.url.includes('/set');
+  try {
+    // Fetch values from Google Sheets using the API URI method
+    const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${YOUR_SPREADSHEET_ID}/values/url!A:B?key=${YOUR_API_KEY}`);
 
-        if (isSetRequest) {
-            const queryParams = { ...req.query };
-            const [[shortcode, encodedLongUrl]] = Object.entries(queryParams);
-            if (!shortcode || !encodedLongUrl) {
-                return res.status(400).json({
-                    error: 'Invalid format',
-                    usage: `Use: ${process.env.DOMAIN || `http://${req.headers.host}`}/api/redirects/set?yourshortcode=https://example.com`
-                });
-            }
-
-            const longUrl = decodeURIComponent(encodedLongUrl);
-
-            try {
-                new URL(longUrl);
-            } catch (e) {
-                return res.status(400).json({
-                    error: 'Invalid URL format',
-                    provided: longUrl
-                });
-            }
-
-            const exists = await redis.get(shortcode);
-            if (exists) {
-                return res.status(200).json({
-                    message: 'Shortcode already exists',
-                    shortcode,
-                    originalUrl: exists,
-                    shortUrl: `${process.env.DOMAIN || `http://${req.headers.host}`}/${shortcode}`
-                });
-            }
-
-            await redis.set(shortcode, longUrl);
-            return res.status(200).json({
-                message: 'URL shortened successfully',
-                shortcode,
-                originalUrl: longUrl,
-                shortUrl: `${process.env.DOMAIN || `http://${req.headers.host}`}/${shortcode}`
-            });
-        } else {
-            const urlParts = req.url.split('/');
-            const shortcode = urlParts[urlParts.length - 1];
-            if (!shortcode || shortcode === 'redirects') {
-                return res.status(400).json({
-                    error: 'Shortcode required',
-                    usage: {
-                        create: `${process.env.DOMAIN || `http://${req.headers.host}`}/api/redirects/set?yourshortcode=https://example.com`,
-                        access: `${process.env.DOMAIN || `http://${req.headers.host}`}/api/redirects/yourshortcode`
-                    }
-                });
-            }
-
-            const url = await redis.get(shortcode);
-            if (!url) {
-                return res.status(404).json({
-                    error: 'URL not found',
-                    shortcode
-                });
-            }
-
-            return res.redirect(url);
-        }
-    } catch (error) {
-        console.error('Redis error:', error);
-        return res.status(500).json({ error: 'Internal server error' });
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
     }
-}
 
-export const config = {
-    api: {
-        bodyParser: true,
-    },
-};
+    const data = await response.json();
+    const rows = data.values;
+
+    // Check if any row matches the shortcode
+    const foundRow = rows?.find(row => row[0] === shortcode); // Assuming shortcode is in the first column
+
+    if (foundRow) {
+      const originalUrl = foundRow[1]; // Assuming original URL is in the second column
+      return res.redirect(originalUrl); // Redirect to the original URL
+    } else {
+      return res.redirect(`https://http.cat/${res.status}`);
+    }
+  } catch (error) {
+    console.error('Error accessing Google Sheets:', error);
+    return res.redirect(`https://http.cat/${res.status}`);
+  }
+}

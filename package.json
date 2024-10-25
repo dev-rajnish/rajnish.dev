@@ -7,9 +7,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "googleapis": "^144.0.0",
     "next": "^14.2.15",
-    "node-fetch": "^3.3.2",
-    "redis": "^4.7.0"
+    "node-fetch": "^3.3.2"
   }
 }

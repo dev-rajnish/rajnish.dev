@@ -1,15 +1,5 @@
 {
   "redirects": [
-  {
-      "source": "/favicon.ico",
-      "destination": "/favicon.ico",
-      "permanent": true
-    },
-    {
-      "source": "/eg",
-      "destination": "https://example.com",
-      "permanent": true
-    },
     {
       "source": "/:shortcode",
       "destination": "/api/redirects?shortcode=:shortcode",
