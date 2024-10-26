@@ -1,8 +1,8 @@
 {
   "redirects": [
     {
-      "source": "/:shortcode",
-      "destination": "/api/redirects?shortcode=:shortcode",
+      "source": "/:customSlug",
+      "destination": "/api/redirects?customSlug=:customSlug",
       "permanent": true
     }
   ]
