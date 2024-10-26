@@ -3,8 +3,8 @@ const GOOGLE_SHEETS_SPREADSHEET_ID = process.env.GSHEET_ID;
 const GOOGLE_SHEETS_API_KEY = process.env.GSHEET_API;
 
 const GOOGLE_SHEET_URL = `
-https://sheets.googleapis.com/v4/spreadsheets
-/${GOOGLE_SHEETS_SPREADSHEET_ID}/values/url!AB?
+https://sheets.googleapis.com/v4/spreadsheets/\
+${GOOGLE_SHEETS_SPREADSHEET_ID}/values/url!AB?\
 key=${GOOGLE_SHEETS_API_KEY}
 `
 /**
