@@ -33,7 +33,7 @@ async function fetchGoogleSheetsData(customSlug) {
  */
 
 async function handleShortcodeRedirect(req, res) {
-  const shortcode = req.query.customSlug;
+  const customSlug = req.query.customSlug;
   const data = await fetchGoogleSheetsData(customSlug);
   const rows = data.values;
 
