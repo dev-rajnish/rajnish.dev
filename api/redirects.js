@@ -4,7 +4,7 @@ const GOOGLE_SHEETS_API_KEY = process.env.GSHEET_API;
 
 const GOOGLE_SHEET_URL = `
 https://sheets.googleapis.com/v4/spreadsheets/\
-${GOOGLE_SHEETS_SPREADSHEET_ID}/values/url!AB?\
+${GOOGLE_SHEETS_SPREADSHEET_ID}/values/url!A:B?\
 key=${GOOGLE_SHEETS_API_KEY}
 `
 /**
@@ -32,7 +32,7 @@ async function fetchGoogleSheetsData(customSlug) {
  * @param {object} res - The response object
  */
 
-async function handleShortcodeRedirect(req, res) {
+async function handleCustomSlugRedirect(req, res) {
   const customSlug = req.query.customSlug;
   const data = await fetchGoogleSheetsData(customSlug);
   const rows = data.values;
@@ -63,7 +63,7 @@ function handleError(err, req, res) {
 
 export default async function handler(req, res) {
   try {
-    await handleShortcodeRedirect(req, res);
+    await handleCustomSlugRedirect(req, res);
   } catch (err) {
     handleError(err, req, res);
   }
